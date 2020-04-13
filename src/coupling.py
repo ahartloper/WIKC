@@ -4,18 +4,18 @@ from .constraint import Constraint
 class BSCoupling:
     """ Defines a beam-to-shell coupling. """
 
-    def __init__(self, shell_nodes, beam_node, coord_sys_id):
+    def __init__(self, shell_nodes, beam_node, coord_sys):
         """ Constructor.
         :param dict shell_nodes: Tags and local coordinates of the shell nodes.
-        :param int beam_node: Tag of the beam node.
-        :param int coord_sys_id: Tag of the coordinate system that relates the local and global coordinate systems.
+        :param int beam_node: Tag and coordinates of the beam node.
+        :param int coord_sys: Transformation that relates the local and global coordinate systems.
 
         Creates the constraint equations for all the shell nodes.
         """
         # Data
         self.shell_nodes = shell_nodes
         self.beam_node = beam_node
-        self.coord_sys_id = coords_id
+        self.coord_sys = coord_sys
 
         self.constraints = list()
 
@@ -29,7 +29,7 @@ class BSCoupling:
 
     def _construct_constraint_equations(self):
         """ Adds all the constraint equations to the set of constraints. """
-        for shell_id in shell_nodes.keys:
+        for shell_id in self.shell_nodes.keys():
             self._add_x_constraint(shell_id)
             self._add_y_constraint(shell_id)
             self._add_z_constraint(shell_id)

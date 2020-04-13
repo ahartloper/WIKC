@@ -1,4 +1,4 @@
-
+import numpy as np
 from .coupling import BSCoupling
 
 # definition file prototype:
@@ -17,8 +17,8 @@ from .coupling import BSCoupling
 # compute all the local coords
 # create constraints
 
-NSET_KEYW = *Nset
-NODE_KEYW = *Node
+NSET_KEYW = '*Nset'
+NODE_KEYW = '*Node'
 
 
 class AbaqusInpReader:
@@ -43,7 +43,7 @@ class AbaqusInpReader:
                     self.couplings.append({'beam_set': l_list[0], 'shell_set': l_list[1], 'coord_sys': l_list[2]})
                     self.beam_sets[l_list[0]] = []
                     self.shell_sets[l_list[1]] = []
-                    self.coord_syss.[l_list[2]] = []
+                    self.coord_syss[l_list[2]] = []
         return
 
     def _read_inp_file(self, inp_file):
@@ -54,7 +54,7 @@ class AbaqusInpReader:
             # Get all the nodes in the node sets
             for line in file:
                 l = line.strip()
-                if l[:NSET_KEYW] == NSET_KEYW:
+                if l[:len(NSET_KEYW)] == NSET_KEYW:
                     n_set_name = l.split(',')[1].split('=')[1]
                     if n_set_name in self.shell_sets:
                         self.shell_sets[n_set_name] = self._read_n_set(file)
@@ -67,13 +67,14 @@ class AbaqusInpReader:
                 l = line.strip()
                 if l[0] == '*':
                     node_reading = False
-                if l[:NODE_KEYW] == NODE_KEYW:
+                if l[:len(NODE_KEYW)] == NODE_KEYW:
                     node_reading = True
-                if node_reading:
+                elif node_reading:
                     l_list = l.split(',')
                     node_id = int(l_list[0])
                     if node_id in self.all_nodes:
-                        self.all_nodes[node_id] = l_list[1:]
+                        coords = [float(c) for c in l_list[1:]]
+                        self.all_nodes[node_id] = coords
         return
 
     def read(self, inp_file, definition_file):
@@ -85,13 +86,16 @@ class AbaqusInpReader:
             coord_sys = c['coord_sys']
             shell_nodes = {}
             beam_node = {}
-            for n in self.shell_sets[c['shell_set']]:
-                shell_nodes[n] = self.all_nodes[n]
-            for n in self.shell_sets[c['beam_set']]:
+            for n in self.beam_sets[c['beam_set']]:
                 beam_node[n] = self.all_nodes[n]
+            # Get the local transformations
+            # todo: handle other situations
+            translation = np.array(beam_node[n])
+            rotation = np.identity(3)
+            for n in self.shell_sets[c['shell_set']]:
+                shell_nodes[n] = np.matmul(rotation, np.array(self.all_nodes[n]) - translation)
             couples.append(BSCoupling(shell_nodes, beam_node, coord_sys))
         return couples
-        
 
     def _read_n_set(self, fp):
         """ Returns the IDs of the nodes in the node set. """
@@ -101,7 +105,8 @@ class AbaqusInpReader:
         while l[0] != '*':
             nodes = l.split(',')
             for n in nodes:
-                node_set.append(int(n))
-                self.all_nodes[int(n)] = []
+                if n != '':
+                    node_set.append(int(n))
+                    self.all_nodes[int(n)] = []
             l = next(fp).strip()
         return node_set
