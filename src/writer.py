@@ -4,19 +4,20 @@ import os
 class AbaqusCouplingWriter:
     """ Writes the constraints for using in an Abaqus input file. """
 
-    def __init__(self, output_dir, input_path_spec='filename'):
+    def __init__(self, output_dir, input_path_prepend=''):
         """ Constructor.
         :param str output_dir: Directory where files will be saved.
-        :param str input_path_spec: Use file name or full file path in input= optional parameter.
+        :param str input_path_prepend: String prepended to the input specification in the keyword line.
 
         Notes:
             - Deletes any previous data or keyword files in the output directory upon construction.
-            - The values of input_path_spec are either: 'filename' or 'filepath'
-                - 'filename' uses the name of the file (e.g., place the generated files in the working directory)
-                - 'filepath' uses the full path (e.g., the files must be kept in the same location, but anywhere)
+            - If input_path_prepend is not empty, then the keyword line is modified as follows:
+                *Equation, input=<input_path_prepend><filename>
+            E.g., if input_path_prepend='constr_files/', then the keyword line will be:
+                *Equation, input=constr_files/<filename>
         """
         self.output_dir = output_dir
-        self.input_path_spec = input_path_spec
+        self.input_path_prepend = input_path_prepend
         self.DATAFILE_BASE = 'Constr_Eqn_Def_'
         self.KEYWFILE_BASE = 'Equation_Keywords.txt'
 
@@ -41,12 +42,7 @@ class AbaqusCouplingWriter:
             for constraint in couple.constraints:
                 filename = self.DATAFILE_BASE + str(constraint_num) + '.txt'
                 filepath = os.path.join(self.output_dir, filename)
-                if self.input_path_spec == 'filename':
-                    file_list.append(filename)
-                elif self.input_path_spec == 'filepath':
-                    file_list.append(filepath)
-                else:
-                    raise ValueError('Incorrect input_path_spec.')
+                file_list.append(self.input_path_prepend + filename)
                 self._constraint_file_writer(constraint, filepath)
                 constraint_num += 1
         keyword_file = os.path.join(self.output_dir, self.KEYWFILE_BASE)

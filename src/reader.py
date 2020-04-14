@@ -37,7 +37,7 @@ class AbaqusInpReader:
             for line in file:
                 l = line.strip()
                 if l == '*coupling':
-                    line = next(file)
+                    line = file.readline()
                     l_list = line.split(',')
                     l_list = [l.strip() for l in l_list]
                     self.couplings.append({'beam_set': l_list[0], 'shell_set': l_list[1], 'coord_sys': l_list[2]})
@@ -51,8 +51,9 @@ class AbaqusInpReader:
         node_reading = False
 
         with open(inp_file, 'r') as file:
-            # Get all the nodes in the node sets
-            for line in file:
+            # Using file.readline() is necessary because next(file) does not allow file.tell()
+            line = file.readline()
+            while line:
                 l = line.strip()
                 if l[:len(NSET_KEYW)] == NSET_KEYW:
                     n_set_name = l.split(',')[1].split('=')[1]
@@ -61,6 +62,7 @@ class AbaqusInpReader:
                     elif n_set_name in self.beam_sets:
                         self.beam_sets[n_set_name] = self._read_n_set(file)
                 # todo: add reading for the coord systems
+                line = file.readline()
             # Get coordinates of all registered nodes
             file.seek(0)
             for line in file:
@@ -91,7 +93,8 @@ class AbaqusInpReader:
             beam_node_id = n
             # Get the local transformations
             # todo: handle other situations
-            translation = np.array(beam_node[beam_node_id])
+            # translation = np.array(beam_node[beam_node_id])
+            translation = np.array([0., 0., 0.])
             rotation = np.identity(3)
             for n in self.shell_sets[c['shell_set']]:
                 shell_nodes[n] = np.matmul(rotation, np.array(self.all_nodes[n]) - translation)
@@ -99,15 +102,24 @@ class AbaqusInpReader:
         return couples
 
     def _read_n_set(self, fp):
-        """ Returns the IDs of the nodes in the node set. """
-        # todo: add case of "generate" option
+        """ Returns the IDs of the nodes in the node set. 
+        :param FilePointer fp: Pointer to the file being read.
+        """
+        # todo: add case of "generate" option in the Nset
+        def peek_line(f):
+            pos = f.tell()
+            line = f.readline()
+            f.seek(pos)
+            return line
+
         node_set = []
-        l = next(fp).strip()
-        while l[0] != '*':
+        peeked_line = 'START'
+        while peeked_line[0] != '*':
+            l = fp.readline().strip()
             nodes = l.split(',')
             for n in nodes:
                 if n != '':
                     node_set.append(int(n))
                     self.all_nodes[int(n)] = []
-            l = next(fp).strip()
+            peeked_line = peek_line(fp).strip()
         return node_set
