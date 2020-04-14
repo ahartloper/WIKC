@@ -41,7 +41,7 @@ class BSCoupling:
         # Shell disp x
         constr.add_term(node=shell_id, dof=1, coef=self.SHELL_COEF)
         # Beam disp x
-        constr.add_term(node=self.beam_node, dof=1, coef=-self.BEAM_DISP_COEF)
+        constr.add_term(node=self.beam_node, dof=1, coef=self.BEAM_DISP_COEF)
         # Beam twist z
         constr.add_term(node=self.beam_node, dof=6, coef=self.shell_nodes[shell_id][1])
         self.constraints.append(constr)
@@ -53,7 +53,7 @@ class BSCoupling:
         # Shell disp y
         constr.add_term(node=shell_id, dof=2, coef=self.SHELL_COEF)
         # Beam disp y
-        constr.add_term(node=self.beam_node, dof=2, coef=-self.BEAM_DISP_COEF)
+        constr.add_term(node=self.beam_node, dof=2, coef=self.BEAM_DISP_COEF)
         # Beam twist z
         constr.add_term(node=self.beam_node, dof=6, coef=-self.shell_nodes[shell_id][0])
         self.constraints.append(constr)
@@ -65,7 +65,7 @@ class BSCoupling:
         # Shell disp z
         constr.add_term(node=shell_id, dof=3, coef=self.SHELL_COEF)
         # Beam disp z
-        constr.add_term(node=self.beam_node, dof=3, coef=-self.BEAM_DISP_COEF)
+        constr.add_term(node=self.beam_node, dof=3, coef=self.BEAM_DISP_COEF)
         # Beam rot x
         constr.add_term(node=self.beam_node, dof=4, coef=-self.shell_nodes[shell_id][1])
         # Beam rot y

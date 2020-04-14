@@ -88,13 +88,14 @@ class AbaqusInpReader:
             beam_node = {}
             for n in self.beam_sets[c['beam_set']]:
                 beam_node[n] = self.all_nodes[n]
+            beam_node_id = n
             # Get the local transformations
             # todo: handle other situations
-            translation = np.array(beam_node[n])
+            translation = np.array(beam_node[beam_node_id])
             rotation = np.identity(3)
             for n in self.shell_sets[c['shell_set']]:
                 shell_nodes[n] = np.matmul(rotation, np.array(self.all_nodes[n]) - translation)
-            couples.append(BSCoupling(shell_nodes, beam_node, coord_sys))
+            couples.append(BSCoupling(shell_nodes, beam_node_id, coord_sys))
         return couples
 
     def _read_n_set(self, fp):
