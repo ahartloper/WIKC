@@ -66,16 +66,17 @@ class AbaqusInpReader:
             # Get coordinates of all registered nodes
             file.seek(0)
             for line in file:
-                l = line.strip()
-                if l[0] == '*':
+                l = line.split(',')
+                l = [li.strip() for li in l]
+                if l[0][0] == '*':
+                    # Stop at any keyword
                     node_reading = False
-                if l[:len(NODE_KEYW)] == NODE_KEYW:
+                if l[0] == NODE_KEYW:
                     node_reading = True
                 elif node_reading:
-                    l_list = l.split(',')
-                    node_id = int(l_list[0])
+                    node_id = int(l[0])
                     if node_id in self.all_nodes:
-                        coords = [float(c) for c in l_list[1:]]
+                        coords = [float(c) for c in l[1:]]
                         self.all_nodes[node_id] = coords
         return
 
@@ -92,8 +93,7 @@ class AbaqusInpReader:
                 beam_node[n] = self.all_nodes[n]
             beam_node_id = n
             # Get the local transformations
-            # todo: handle other situations
-            # translation = np.array(beam_node[beam_node_id])
+            # todo: handle other situations for local coordinates
             translation = np.array([0., 0., 0.])
             rotation = np.identity(3)
             for n in self.shell_sets[c['shell_set']]:
@@ -102,8 +102,8 @@ class AbaqusInpReader:
         return couples
 
     def _read_n_set(self, fp):
-        """ Returns the IDs of the nodes in the node set. 
-        :param FilePointer fp: Pointer to the file being read.
+        """ Returns the IDs of the nodes in the node set.
+        :param FileObject fp: Pointer to the file being read.
         """
         # todo: add case of "generate" option in the Nset
         def peek_line(f):
