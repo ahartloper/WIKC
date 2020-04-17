@@ -6,17 +6,6 @@ from .coupling import BSCoupling
 # <beam_n_set_string>, <shell_n_set_string>, <local_coord_sys_string>
 # repeat lines
 
-# open def file
-# save all nsets and coord sys to read
-# close def file
-# open inp file
-# collect all the nodes in all the nsets
-# reset file
-# read all the necessary nodes
-# read all the coord sys
-# compute all the local coords
-# create constraints
-
 NSET_KEYW = '*Nset'
 NODE_KEYW = '*Node'
 

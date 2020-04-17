@@ -15,6 +15,8 @@ class AbaqusCouplingWriter:
                 *Equation, input=<input_path_prepend><filename>
             E.g., if input_path_prepend='constr_files/', then the keyword line will be:
                 *Equation, input=constr_files/<filename>
+            This parameter is useful to specify the absolute path of the files or a relative path to the
+            Abaqus working directory.
         """
         self.output_dir = output_dir
         self.input_path_prepend = input_path_prepend
@@ -40,6 +42,7 @@ class AbaqusCouplingWriter:
         constraint_num = 0
         for couple in couplings:
             for constraint in couple.constraints:
+                # todo: make the filename based on the node and DOF
                 filename = self.DATAFILE_BASE + str(constraint_num) + '.txt'
                 filepath = os.path.join(self.output_dir, filename)
                 file_list.append(self.input_path_prepend + filename)
