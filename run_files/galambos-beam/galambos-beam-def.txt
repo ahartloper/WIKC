@@ -1,0 +1,4 @@
+*coupling
+beam-1_beam_bot_node, bot_couple_shell_nodes, (global)
+*coupling
+beam-1_beam_top_node, top_couple_shell_nodes, (global)

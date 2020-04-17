@@ -6,6 +6,6 @@ def_file = 'run_files/w24x84-dynamic/w24x84-dynamic-def.txt'
 out_dir = 'run_files/w24x84-dynamic/output/'
 
 reader = AbaqusInpReader()
-writer = AbaqusCouplingWriter(out_dir)
+writer = AbaqusCouplingWriter(out_dir, 'constr_files/')
 couplings = reader.read(inp_file, def_file)
 writer.write(couplings)
