@@ -8,7 +8,7 @@ C
      * U(MAXDOF,N),UINIT(MAXDOF,N),TIME(2),TEMP(NT,N),
      * FIELD(NF,NT,N),LTRAN(N),TRAN(3,3,N)
 C     Internal variables
-      real :: disp_beam(3), rot_beam(3), w_beam, warp_fun,
+      real(8) :: disp_beam(3), rot_beam(3), w_beam, warp_fun,
      *      I33(3, 3)
       real(8) :: rmat(3, 3), rmat3(3), link(3)
       integer :: i
@@ -45,22 +45,27 @@ C     Rotation vector to rotation matrix using Rodriguez forumla
       PURE FUNCTION RVEC2RMAT(rvec) RESULT(rrr)
       real(8), intent(in) :: rvec(3)
       real(8), intent(out) :: rrr(3, 3)
-      real(8) :: r, rr(3), r_out_r(3, 3)
+      real(8) :: r, rr(3), r_out_r(3, 3), small_tol
+      parameter(small_tol=1.e-14)
       r = norm2(rvec)
-      rr = rvec / r
-      forall (i = 1:3)
-            forall(j = 1:3) r_out_r(i, j) = rr(i) * rr(j)
-      end forall
-      rrr = cos(r)*I33 + (1.d0-cos(r))*r_out_r + sin(r)*skew(rr)
+      if (r < small_tol) then
+            rrr = I33
+      else
+            rr = rvec / r
+            forall (i = 1:3)
+                  forall(j = 1:3) r_out_r(i, j) = rr(i) * rr(j)
+            end forall
+            rrr = cos(r)*I33 + (1.d0-cos(r))*r_out_r + sin(r)*skew(rr)
+      end if
       END FUNCTION
 
 C     Vector to skew-symmetric matrix
       PURE FUNCTION SKEW(v) RESULT(m)
-      real, intent(in) :: v(3)
-      real, intent(out) :: m(3, 3)
-      m(1:3, 1) = [0., v(3), -v(2)]
-      m(1:3, 2) = [-v(3), 0., v(1)]
-      m(1:3, 3) = [v(2), -v(1), 0.]
+      real(8), intent(in) :: v(3)
+      real(8), intent(out) :: m(3, 3)
+      m(1:3, 1) = [0.d0, -v(3), v(2)]
+      m(1:3, 2) = [v(3), 0.d0, -v(1)]
+      m(1:3, 3) = [-v(2), v(1), 0.d0]
       END FUNCTION
 
       END SUBROUTINE
