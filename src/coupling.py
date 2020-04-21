@@ -37,7 +37,7 @@ class BSCoupling:
 
     def _add_x_constraint(self, shell_id):
         """ Constraint for shell x displacement. """
-        constr = Constraint()
+        constr = Constraint(constr_name='disp-x')
         # Shell disp x
         constr.add_term(node=shell_id, dof=1, coef=self.SHELL_COEF)
         # Beam disp x
@@ -49,7 +49,7 @@ class BSCoupling:
 
     def _add_y_constraint(self, shell_id):
         """ Constraint for shell y displacement. """
-        constr = Constraint()
+        constr = Constraint(constr_name='disp-y')
         # Shell disp y
         constr.add_term(node=shell_id, dof=2, coef=self.SHELL_COEF)
         # Beam disp y
@@ -61,9 +61,10 @@ class BSCoupling:
 
     def _add_z_constraint(self, shell_id):
         """ Constraint for shell y displacement. """
-        constr = Constraint()
+        constr = Constraint(constr_name='disp-z')
         # Shell disp z
-        constr.add_term(node=shell_id, dof=3, coef=self.SHELL_COEF)
+        constr.add_term(node=shell_id, dof=3, coef=self.SHELL_COEF,
+                        name='shell-term')
         # Beam disp z
         constr.add_term(node=self.beam_node, dof=3, coef=self.BEAM_DISP_COEF)
         # Beam rot x
@@ -71,6 +72,7 @@ class BSCoupling:
         # Beam rot y
         constr.add_term(node=self.beam_node, dof=5, coef=self.shell_nodes[shell_id][0])
         # Beam warping
-        constr.add_term(node=self.beam_node, dof=7, coef=-self.shell_nodes[shell_id][0]*self.shell_nodes[shell_id][1])
+        constr.add_term(node=self.beam_node, dof=7, coef=-self.shell_nodes[shell_id][0]*self.shell_nodes[shell_id][1],
+                        name='warping-term')
         self.constraints.append(constr)
         return
