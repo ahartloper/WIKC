@@ -4,11 +4,13 @@ from .constraint import Constraint
 class BSCoupling:
     """ Defines a beam-to-shell coupling. """
 
-    def __init__(self, shell_nodes, beam_node, coord_sys):
+    def __init__(self, shell_nodes, beam_node, coord_sys, include_warping=True, use_nonlinear=True):
         """ Constructor.
         :param dict shell_nodes: Tags and local coordinates of the shell nodes.
         :param int beam_node: Tag and coordinates of the beam node.
         :param int coord_sys: Transformation that relates the local and global coordinate systems.
+        :param bool include_warping: If True, use the 7DOF in the constraint formulation.
+        :param bool use_nonlinear: If True, use the nonlinear form of the constraint.
 
         Creates the constraint equations for all the shell nodes.
         """
@@ -18,6 +20,10 @@ class BSCoupling:
         self.coord_sys = coord_sys
 
         self.constraints = list()
+
+        # Constraint type specification
+        self.include_warping = include_warping
+        self.use_nonlinear = use_nonlinear
 
         # Parameters
         self.SHELL_COEF = 1.0

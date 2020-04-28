@@ -1,6 +1,6 @@
 import unittest
 from src.reader import AbaqusInpReader
-from src.abaqus_writer import AbaqusLinearCouplingWriter, AbaqusNonLinerCouplingWriter
+from src.abaqus_writer import AbaqusLinearCouplingWriter, AbaqusNonLinearCouplingWriter
 
 inp_file = 'testing/Job-1.inp'
 def_file = 'testing/def_file_1.txt'
@@ -18,6 +18,6 @@ class TestAbaqusWriter(unittest.TestCase):
 
     def test_nl_writer(self):
         reader = AbaqusInpReader()
-        writer = AbaqusNonLinerCouplingWriter(out_dir_nl)
+        writer = AbaqusNonLinearCouplingWriter(out_dir_nl)
         couplings = reader.read(inp_file, def_file)
         writer.write(couplings)

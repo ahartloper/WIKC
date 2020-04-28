@@ -32,12 +32,12 @@ class AbaqusWriter:
         return
 
 
-class AbaqusNonLinerCouplingWriter(AbaqusWriter):
+class AbaqusNonLinearCouplingWriter(AbaqusWriter):
 
     def __init__(self, output_dir):
         AbaqusWriter.__init__(self, output_dir)
         self.KEYWFILE_BASE = 'MPC_Field_Keywords.txt'
-        self.JTYPE_VAL = 0
+        self.JTYPE_DEFAULT = 0
         self._clear_output()
         return
 
@@ -47,7 +47,10 @@ class AbaqusNonLinerCouplingWriter(AbaqusWriter):
         DISP_Z_NAME = 'disp-z'
         WARP_NAME = 'warping-term'
         SHELL_NAME = 'shell-term'
+        field_strings = []
+        mpc_strings = []
         for couple in couplings:
+            jtype = self._gen_jtype(couple)
             beam_node = couple.beam_node
             shell_node_ids = couple.shell_nodes.keys()
             warping_values = dict()
@@ -61,11 +64,24 @@ class AbaqusNonLinerCouplingWriter(AbaqusWriter):
                             # Since the negative of the warping function is stored
                             w = -1.0 * term.coef
                     warping_values[node] = w
-            field_strings = self._gen_field_strings(warping_values)
-            mpc_strings = self._gen_mpc_strings(beam_node, shell_node_ids)
-            amp_strings = self._gen_amp_strings()
+            field_strings += self._gen_field_strings(warping_values)
+            mpc_strings += self._gen_mpc_strings(beam_node, shell_node_ids, jtype)
+        # Write the strings
+        amp_strings = self._gen_amp_strings()
         self._write_keyw_file(field_strings, mpc_strings, amp_strings)
         return
+
+    def _gen_jtype(self, couple):
+        """ Returns the JTYPE for the specified couple. """
+        if couple.include_warping and couple.use_nonlinear:
+            jtype = 27
+        elif couple.include_warping and not couple.use_nonlinear:
+            jtype = 17
+        elif not couple.include_warping and couple.use_nonlinear:
+            jtype = 26
+        elif not couple.include_warping and not couple.use_nonlinear:
+            jtype = 16
+        return jtype
 
     def _write_keyw_file(self, field_strings, mpc_strings, amp_strings):
         """ Writes the file containing the keyword additions. """
@@ -73,6 +89,8 @@ class AbaqusNonLinerCouplingWriter(AbaqusWriter):
         with open(keyw_file, 'w') as file:
             file.write('** MPC Keywords\n** Copy these in the model definition\n')
             file.writelines(mpc_strings)
+            file.write('\n\n** Amplitude Keyword\n** Copy these in the model definition\n')
+            file.writelines(amp_strings)
             file.write('\n\n** Field Keywords\n** Copy these in the first step\n')
             file.writelines(field_strings)
         return
@@ -81,7 +99,7 @@ class AbaqusNonLinerCouplingWriter(AbaqusWriter):
         """ Returns the strings to define the amplitude for the warping function field. """
         strings = []
         MAX_TIME = '1.E6'
-        strings.append(', '.join(['Amplitude', 'name=warp_fun_amp\n']))
+        strings.append(', '.join(['*Amplitude', 'name=warp_fun_amp\n']))
         strings.append(', '.join(['0.0', '1.0\n']))
         strings.append(', '.join([MAX_TIME, '1.0\n']))
         return strings
@@ -95,12 +113,12 @@ class AbaqusNonLinerCouplingWriter(AbaqusWriter):
             strings.append(', '.join([str(node), str(val) + '\n']))
         return strings
 
-    def _gen_mpc_strings(self, beam_node, shell_nodes):
+    def _gen_mpc_strings(self, beam_node, shell_nodes, jtype):
         """ Returns the strings for the MPC keywords. """
         strings = []
         for node in shell_nodes:
             s = ', '.join(['*MPC', 'MODE=NODE', 'USER\n'])
-            s += ', '.join([str(self.JTYPE_VAL), str(node), str(beam_node) + '\n'])
+            s += ', '.join([str(jtype), str(node), str(beam_node) + '\n'])
             strings.append(s)
         return strings
 

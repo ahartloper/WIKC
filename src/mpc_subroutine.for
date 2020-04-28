@@ -10,7 +10,7 @@ C
 C     Internal variables
       real(8) :: disp_beam(3), rot_beam(3), w_beam, warp_fun,
      *      I33(3, 3)
-      real(8) :: rmat(3, 3), rmat3(3), link(3)
+      real(8) :: rmat(3, 3), rmat3(3), link(3), rotlink(3)
       integer :: i
 C     Constraint definition start
       disp_beam = U(1:3, 2)

@@ -21,15 +21,26 @@ class AbaqusInpReader:
         self.all_nodes = dict()
 
     def _read_def_file(self, def_file):
-        """ Reads the information in coupline definition file. """
+        """ Reads the information in coupling definition file. """
         with open(def_file, 'r') as file:
             for line in file:
-                l = line.strip()
-                if l == '*coupling':
+                l_list = line.split(',')
+                l_list = [li.strip() for li in l_list]
+                if l_list[0] == '*coupling':
+                    # Extract any options in the coupling
+                    couple_options = dict()
+                    if len(l_list) > 1:
+                        for li in l_list[1:]:
+                            opt = li.split('=')[0]
+                            opt_val = li.split('=')[1]
+                            couple_options[opt] = opt_val
+                    # Get the data of the coupling
                     line = file.readline()
                     l_list = line.split(',')
                     l_list = [l.strip() for l in l_list]
-                    self.couplings.append({'beam_set': l_list[0], 'shell_set': l_list[1], 'coord_sys': l_list[2]})
+                    couple_data = {'beam_set': l_list[0], 'shell_set': l_list[1], 'coord_sys': l_list[2]}
+                    couple_data = {**couple_data, **couple_options}
+                    self.couplings.append(couple_data)
                     self.beam_sets[l_list[0]] = []
                     self.shell_sets[l_list[1]] = []
                     self.coord_syss[l_list[2]] = []
@@ -87,8 +98,27 @@ class AbaqusInpReader:
             rotation = np.identity(3)
             for n in self.shell_sets[c['shell_set']]:
                 shell_nodes[n] = np.matmul(rotation, np.array(self.all_nodes[n]) - translation)
-            couples.append(BSCoupling(shell_nodes, beam_node_id, coord_sys))
+            # Set the coupling type
+            constr_def = {}
+            if 'jtype' in c:
+                constr_def = self._parse_jtype(c['jtype'])
+            couples.append(BSCoupling(shell_nodes, beam_node_id, coord_sys, **constr_def))
         return couples
+
+    def _parse_jtype(self, jtype):
+        """ Returns the options from jtype. """
+        val = int(jtype)
+        if val == 16:
+            constr_def = {'include_warping': False, 'use_nonlinear': False}
+        elif val == 17:
+            constr_def = {'include_warping': True, 'use_nonlinear': False}
+        if val == 26:
+            constr_def = {'include_warping': False, 'use_nonlinear': True}
+        elif val == 27:
+            constr_def = {'include_warping': True, 'use_nonlinear': True}
+        else:
+            raise ValueError('Incorrect JTYPE provided.')
+        return constr_def
 
     def _read_n_set(self, fp):
         """ Returns the IDs of the nodes in the node set.
