@@ -41,7 +41,7 @@ C     Linear constraint
             ! Constraint linearization
             A(1:3, 4:6, 2) = -skew(link)
             ! Warping component
-            if (JTYPE == 27) then
+            if (JTYPE == 17) then
                   UE(3) = UE(3) + warp_fun*w_beam
                   A(3,   7, 2) = -warp_fun
                   JDOF(7, 2) = 7
