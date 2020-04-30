@@ -112,7 +112,7 @@ class AbaqusInpReader:
             constr_def = {'include_warping': False, 'use_nonlinear': False}
         elif val == 17:
             constr_def = {'include_warping': True, 'use_nonlinear': False}
-        if val == 26:
+        elif val == 26:
             constr_def = {'include_warping': False, 'use_nonlinear': True}
         elif val == 27:
             constr_def = {'include_warping': True, 'use_nonlinear': True}
