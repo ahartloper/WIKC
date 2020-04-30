@@ -32,14 +32,14 @@ C     Terms independent of linear/nonlinear
             JDOF(i, 2) = i
       end do
 C     Linear constraint
-      if (JTYPE == 16 .or. JTYPE == 27) then
+      if (JTYPE == 16 .or. JTYPE == 17) then
             ! Constraint equations
             UE(1) = disp_beam(1) - link(2)*rot_beam(3)
             UE(2) = disp_beam(2) + link(1)*rot_beam(3)
-            UE(3) = disp_beam(3) + link(1)*rot_beam(2) 
-     *              - link(2)*rot_beam(1)
+            UE(3) = disp_beam(3) - link(1)*rot_beam(2) 
+     *              + link(2)*rot_beam(1)
             ! Constraint linearization
-            A(1:4, 4:6, 2) = -skew(link)
+            A(1:3, 4:6, 2) = -skew(link)
             ! Warping component
             if (JTYPE == 27) then
                   UE(3) = UE(3) + warp_fun*w_beam
@@ -51,7 +51,7 @@ C     Nonlinear constraint
             rmat = transpose(rvec2rmat(rot_beam))
             rmat3 = rmat(1:3, 3)
             rotlink = matmul(rmat, link)
-            UE(1:3) = rotlink - link + disp_beam
+            UE(1:3) = disp_beam + rotlink - link
             A(1:3, 4:6, 2) = -skew(rotlink)
             ! Warping component
             if (JTYPE == 27) then
