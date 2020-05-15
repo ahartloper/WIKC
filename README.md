@@ -1,4 +1,3 @@
-# BIKC
-Beam-as-Independent Kinematic Coupling
+# Warping-Inclusive Kinematic Coupling (WIKC)
 
-Beam and shell element kinematic coupling.
+Coupling method for beam-continuum macro models for use of wide-flange beam columns.
