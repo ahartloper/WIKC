@@ -1,0 +1,4 @@
+*coupling, jtype=27
+beam_segment-1_beam_node_bot, top_segment_shell_top_nodes, (global)
+*coupling, jtype=27
+beam_segment-1_beam_node_top, shell_segment-1_shell_bot_nodes, (global)
