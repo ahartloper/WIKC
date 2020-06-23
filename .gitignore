@@ -1,3 +1,4 @@
 .vscode/settings.json
 **/output*
 .vscode/launch.json
+theory/component_theory.pdf

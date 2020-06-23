@@ -1,4 +1,2 @@
-# BIKC
-Beam-as-Independent Kinematic Coupling
+# WIKC: Warping-Inclusive Kinematic Coupling
 
-Beam and shell element kinematic coupling.
