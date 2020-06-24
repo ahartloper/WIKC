@@ -1,3 +1,5 @@
+import os
+from .abaqus_writer import AbaqusWriter
 from .abaqus_writer import AbaqusNonLinearCouplingWriter
 
 
@@ -18,18 +20,19 @@ class AbaqusICouplingWriter(AbaqusNonLinearCouplingWriter):
         field_strings = []
         mpc_strings = []
         field_dir_strings = []
+        all_normals = dict()
         for couple in couplings:
             jtype = self._gen_jtype(couple)
-            beam_node = couple.beam_node.keys()[0]
-            shell_node_ids = couple.continuum_nodes.keys()
+            beam_node = list(couple.beam_node.keys())[0]
+            shell_node_ids = list(couple.continuum_nodes.keys())
             warping_values = couple.warping_fun
             field_strings += self._gen_field_strings(warping_values)
             mpc_strings += self._gen_mpc_strings(beam_node, shell_node_ids, jtype)
-        all_normals = [n for n in couplings.normal_dir]
-        field_dir_strings self._gen_dir_field_strings(all_normals)
+            all_normals[beam_node] = couple.normal_direction
         # Write the strings
         amp_strings = self._gen_amp_strings()
-        self._write_keyw_file(field_strings, mpc_strings, amp_strings)
+        field_dir_strings = self._gen_dir_field_strings(all_normals)
+        self._write_keyw_file(field_strings, mpc_strings, amp_strings, field_dir_strings)
         return
 
     def _write_keyw_file(self, field_strings, mpc_strings, amp_strings, normal_strings):

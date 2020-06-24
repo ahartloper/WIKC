@@ -4,15 +4,17 @@ import numpy as np
 class ICoupling:
     """ Warping-Inclusive Kinematic Coupling for I-shaped cross-sections. """
 
-    def __init__(self, beam_node, continuum_nodes, use_nonlinear, include_warping):
+    def __init__(self, beam_node, continuum_nodes, normal_direction, use_nonlinear, include_warping):
         """ Constructor.
         :param dict beam_node: {int: [float, float]} Beam node in the coupling in local coords.
         :param dict continuum_nodes: {int: [float, float]} Continuum nodes in the coupling in local coords.
+        :param np.ndarray normal_direction: (3,) Orientation of cross-section normal vector.
         :param bool use_nonlinear: If True, then nonlinear version of coupling used.
         :param bool include_warping: If True, then use warping-inclusive coupling.
         """
         self.beam_node = beam_node
         self.continuum_nodes = continuum_nodes
+        self.normal_direction = normal_direction
         self.use_nonlinear = use_nonlinear
         self.include_warping = include_warping
 

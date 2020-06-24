@@ -1,4 +1,5 @@
 import unittest
+import numpy as np
 from src.reader import AbaqusInpReader
 from src.component_reader import AbaqusInpToComponentReader
 
@@ -73,3 +74,5 @@ class TestAbaqusComponentReader(unittest.TestCase):
         self.assertEqual(len(couple.continuum_nodes), 13)
         self.assertEqual(couple.use_nonlinear, True)
         self.assertEqual(couple.include_warping, True)
+        n3 = np.array([0., 0., 1.])
+        np.testing.assert_array_equal(couple.normal_direction, n3)

@@ -76,7 +76,8 @@ class AbaqusInpToComponentReader:
                 for node_ids in self.continuum_sets[ci['continuum_set']]:
                     cont_nodes[node_ids] = self.all_nodes_local[node_ids]
                 constr_def = self._parse_jtype(ci['jtype'])
-                c.couplings.append(ICoupling(beam_node, cont_nodes, **constr_def))
+                n3 = c.coord_sys.basis[:, 2]
+                c.couplings.append(ICoupling(beam_node, cont_nodes, n3, **constr_def))
 
     def _assign_component_coord_sys(self):
         """ Assign the component coord sys to global coord sys transformation for all components. """

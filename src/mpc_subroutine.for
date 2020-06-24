@@ -10,13 +10,26 @@ C
 C     Internal variables
       real(8) :: disp_beam(3), rot_beam(3), w_beam, warp_fun,
      *      I33(3, 3)
-      real(8) :: rmat(3, 3), rmat3(3), link(3), rotlink(3)
-      integer :: i
+      real(8) :: rmat(3, 3), t_vec(3), link(3), rotlink(3)
+      integer :: i, size_field, FIELD_w, FIELD_t1, FIELD_t2, FIELD_t3
+      ! Associate the field vars with their uses
+      parameter(FIELD_w=1, FIELD_t1=2, FIELD_t2=3, FIELD_t3=4)
 C     Constraint definition start
+      ! First node is continuum, second node is beam
       disp_beam = U(1:3, 2)
       rot_beam = U(4:6, 2)
       w_beam = U(7, 2)
-      warp_fun = FIELD(1, 1, 1)
+      warp_fun = FIELD(FIELD_w, 1, 1)
+      ! Check the size for compatibility else default to z-axis
+      size_field = size(FIELD, 1)
+      if (size_field > 1) then
+            t_vec(1) = FIELD(FIELD_t1, 1, 2)
+            t_vec(2) = FIELD(FIELD_t2, 1, 2)
+            t_vec(3) = FIELD(FIELD_t3, 1, 2)
+      else
+            t_vec = [0.d0, 0.d0, 1.d0]
+      end if
+
       I33 = 0.d0
       do i = 1, 3
             I33(i, i) = 1.d0
@@ -42,23 +55,24 @@ C     Linear constraint
             A(1:3, 4:6, 2) = -skew(link)
             ! Warping component
             if (JTYPE == 17) then
-                  UE(3) = UE(3) + warp_fun*w_beam
-                  A(3,   7, 2) = -warp_fun
+                  UE(1:3) = UE(1:3) + warp_fun*w_beam*t_vec
+                  A(1:3,   7, 2) = -warp_fun*t_vec
                   JDOF(7, 2) = 7
             end if
 C     Nonlinear constraint
       else if (JTYPE == 26 .or. JTYPE == 27) then
+            ! Transpose for right-hand multiplication
             rmat = transpose(rvec2rmat(rot_beam))
-            rmat3 = rmat(1:3, 3)
+            t_vec = matmul(rmat, t_vec)
             rotlink = matmul(rmat, link)
             UE(1:3) = disp_beam + rotlink - link
             A(1:3, 4:6, 2) = -skew(rotlink)
             ! Warping component
             if (JTYPE == 27) then
-                  UE(1:3) = UE(1:3) + warp_fun*w_beam*rmat3
+                  UE(1:3) = UE(1:3) + warp_fun*w_beam*t_vec
                   A(1:3, 4:6, 2) = A(1:3, 4:6, 2) 
-     *                   - skew(warp_fun*w_beam*rmat3)
-                  A(1:3,   7, 2) = -warp_fun * rmat3
+     *                   - skew(warp_fun*w_beam*t_vec)
+                  A(1:3,   7, 2) = -warp_fun * t_vec
                   JDOF(7, 2) = 7
             end if
       else

@@ -1,3 +1,4 @@
+import os
 from .abaqus_writer import AbaqusWriter
 
 
