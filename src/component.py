@@ -29,12 +29,12 @@ class ICoupling:
 
 
 class CoordSys:
-    """ Defines the local, right-handed coordinate system in R^3 for a component. """
+    """ Defines a right-handed coordinate system in R^3. """
 
     def __init__(self, point, basis):
         """ Constructor.
         :param np.ndarray point: (3, ) Origin of the coord sys wrt the global coord sys.
-        :param np.ndarray n1: (3, 3) Matrix defining the local-to-global rotation.
+        :param np.ndarray basis: (3, 3) Matrix defining the local-to-global rotation, [n1, n2, n3].
         """
         self.pt = point
         self.basis = basis
@@ -74,9 +74,16 @@ class IComponent:
 
         self.beam_node_sets = list()
         self.continuum_node_sets = list()
+        self.node_set_to_coordsys = dict()
         self.couplings_info = list()
 
+        # Base coordinate system for the component
         self.coord_sys = None
+        self.base_cys_id = None
+        # Offsets in component 3-axis for each coord system
+        self.coord_sys_offsets = dict()
+        # All beam and continuum nodes in the component
         self.beam_nodes = dict()
         self.continuum_nodes = dict()
+        # Couplings in the component
         self.couplings = list()

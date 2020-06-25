@@ -60,10 +60,21 @@ class TestAbaqusComponentReader(unittest.TestCase):
     def test_local_transformation(self):
         reader = AbaqusInpToComponentReader()
         reader.read(inp_file, cdef_file)
-        self.assertEqual(reader.all_nodes_local[5][2], 2000.)
+        self.assertEqual(reader.all_nodes_local[5][2], 1000.)
         self.assertEqual(reader.all_nodes_local[240][0], 50.)
         self.assertEqual(reader.all_nodes_local[240][1], 50.)
         self.assertEqual(reader.all_nodes_local[240][2], 375.)
+        pass
+
+    def test_component_transformation(self):
+        reader = AbaqusInpToComponentReader()
+        reader.read(inp_file, cdef_file)
+        c = reader.components[0]
+        np.testing.assert_array_equal(c.coord_sys.pt, np.array([0., 0., 0.]))
+        self.assertEqual(c.beam_nodes[5][2], 2000.)
+        self.assertEqual(c.continuum_nodes[240][0], 50.)
+        self.assertEqual(c.continuum_nodes[240][1], 50.)
+        self.assertEqual(c.continuum_nodes[240][2], 375.)
         pass
 
     def test_component_couplings(self):

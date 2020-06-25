@@ -49,8 +49,9 @@ class AbaqusInpToComponentReader:
         self._read_def_file(definition_file)
         self._read_inp_file(inp_file)
         self._organize_beam_continuum_nodes()
-        self._compute_component_local_coords()
-        self._transform_nodes_to_local()
+        self._compute_cys_transforms()
+        self._cys_transform_part_to_local()
+        self._setup_component_transformations()
         self._define_component_domains()
         self._assign_component_coord_sys()
         self._assign_component_couplings()
@@ -61,10 +62,14 @@ class AbaqusInpToComponentReader:
         for c in self.components:
             for node_set in c.beam_node_sets:
                 for node_id in self.beam_sets[node_set]:
-                    c.beam_nodes[node_id] = self.all_nodes_local[node_id]
+                    local_coords = self.all_nodes_local[node_id]
+                    o_val = c.coord_sys_offsets[self.node_systems[node_id]]
+                    c.beam_nodes[node_id] = local_coords + np.array([0., 0., o_val])
             for node_set in c.continuum_node_sets:
                 for node_id in self.continuum_sets[node_set]:
-                    c.continuum_nodes[node_id] = self.all_nodes_local[node_id]
+                    local_coords = self.all_nodes_local[node_id]
+                    o_val = c.coord_sys_offsets[self.node_systems[node_id]]
+                    c.continuum_nodes[node_id] = self.all_nodes_local[node_id] + np.array([0., 0., o_val])
 
     def _assign_component_couplings(self):
         """ Parse and assign the couplings to the component. """
@@ -82,10 +87,7 @@ class AbaqusInpToComponentReader:
     def _assign_component_coord_sys(self):
         """ Assign the component coord sys to global coord sys transformation for all components. """
         for c in self.components:
-            # Use the first continuum node in the component since assumed to all have same orientation
-            set1 = c.continuum_node_sets[0]
-            node1 = self.continuum_sets[set1][0]
-            cs1 = self.node_systems[node1]
+            cs1 = c.base_cys_id
             c.coord_sys = CoordSys(self.cs_transforms[cs1]['origin'], self.cs_transforms[cs1]['basis'])
 
     def _organize_beam_continuum_nodes(self):
@@ -134,6 +136,10 @@ class AbaqusInpToComponentReader:
                         for li in l_list:
                             self.beam_sets[li] = []
                         peeked_line = peek_line(file).strip()
+                        # Handle empty lines
+                        while peeked_line == '':
+                            line = file.readline()
+                            peeked_line = peek_line(file).strip()
 
                 elif l_list[0] == '*ContinuumNodes':
                     peeked_line = 'START'
@@ -144,6 +150,10 @@ class AbaqusInpToComponentReader:
                         for li in l_list:
                             self.continuum_sets[li] = []
                         peeked_line = peek_line(file).strip()
+                        # Handle empty lines
+                        while peeked_line == '':
+                            line = file.readline()
+                            peeked_line = peek_line(file).strip()
 
                 elif l_list[0] == '*Coupling':
                     couple_options = opt_extract(l_list)
@@ -267,8 +277,8 @@ class AbaqusInpToComponentReader:
                 peeked_line = peek_line(fp).strip()
         return node_set
 
-    def _compute_component_local_coords(self):
-        """ Compute the transformations implied by each coord. sys. """
+    def _compute_cys_transforms(self):
+        """ Compute the transformations implied by each cooridinate system . """
         for cs_tag, cs_data in self.coord_syss.items():
             cs_data = np.array(cs_data)
             if len(cs_data) == 9:
@@ -287,8 +297,8 @@ class AbaqusInpToComponentReader:
             self.cs_transforms[cs_tag] = {'origin': o, 'basis': n_123}
         pass
 
-    def _transform_nodes_to_local(self):
-        """ Transforms the nodes from model to component coordinate systems. """
+    def _cys_transform_part_to_local(self):
+        """ Transforms nodes from part to local coordinate systems. """
         rmat_continuum = np.identity(3)
         rmat_beam = np.array([[0.,  0., -1.],
                               [0.,  1.,  0.],
@@ -301,9 +311,46 @@ class AbaqusInpToComponentReader:
             else:
                 raise ValueError('Node ID not found in beam or continuum domains.')
             c = np.array(coord)
-            o = self.cs_transforms[self.node_systems[node_id]]['origin']
-            transf_coord = np.dot(rmat, c) + o
+            # o = self.cs_transforms[self.node_systems[node_id]]['origin']
+            transf_coord = np.dot(rmat, c)
             # Keep only 8 digits of precision (neglect values < 10^-8)
             transf_coord = transf_coord.round(8)
             self.all_nodes_local[node_id] = transf_coord
+        pass
+
+    def _setup_component_transformations(self):
+        """ Prepares the component for the local to component coooridinate system transformation. """
+        for c in self.components:
+            # Get all the coord systems in a component
+            node_set_to_cys = dict()
+            for node_set in c.beam_node_sets:
+                # Assumed that all nodes in the set have the same coord sys
+                node_in_set = self.beam_sets[node_set][0]
+                node_set_to_cys[node_set] = self.node_systems[node_in_set]
+            for node_set in c.continuum_node_sets:
+                # Assumed that all nodes in the set have the same coord sys
+                node_in_set = self.continuum_sets[node_set][0]
+                node_set_to_cys[node_set] = self.node_systems[node_in_set]
+            c.node_set_to_coordsys = node_set_to_cys
+
+            # Determine the base coord sys for the component
+            cys_in_component = list(node_set_to_cys.values())
+            dist_to_origin = dict()
+            for cys in cys_in_component:
+                dist_to_origin[cys] = np.linalg.norm(self.cs_transforms[cys]['origin'])
+            # Base = closest to the global origin (may break if two are equally close?)
+            base_id = min(dist_to_origin, key=dist_to_origin.get)
+            c.base_cys_id = base_id
+
+            # Compute the part offsets
+            base_coords = self.cs_transforms[base_id]['origin']
+            # Get base normal axis as n3 from any continuum node set
+            cys_id = c.node_set_to_coordsys[c.continuum_node_sets[0]]
+            base_normal_axis = self.cs_transforms[cys_id]['basis'][:, 2]
+            coord_sys_offsets = dict()
+            # Offset is computed as (cys_o - base_o) projected onto normal axis
+            for node_set, cys_id in c.node_set_to_coordsys.items():
+                cys_coords = self.cs_transforms[cys_id]['origin']
+                coord_sys_offsets[cys_id] = np.dot(cys_coords - base_coords, base_normal_axis)
+            c.coord_sys_offsets = coord_sys_offsets
         pass

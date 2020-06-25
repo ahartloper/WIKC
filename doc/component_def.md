@@ -6,6 +6,8 @@ Rules:
 - Beam nodes in the .inp file are defined so that the line-of-centroids is aligned with the x-axis.
 - The cross-section is assumed to be constant along the length.
 - All continuum domains within a component have the same orientation.
+- The file must end with `*EndDef`.
+- It is assumed that all nodes within a node set that is associated with *BeamNodes or *ContinuumNodes uses the same `*System` definition.
 
 The prototype for the .def file is:
 '''
@@ -21,4 +23,6 @@ The prototype for the .def file is:
 <Continuum_nset_...>
 *Coupling, jtype=<jtype>
 <beam_nset_id>, <continuum_nset_id>
+
+*EndDef
 '''
