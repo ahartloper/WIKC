@@ -53,6 +53,7 @@ class ISection:
         """
         self.name = name
         self.d = d
+        self.bf = bf
         self.tf = tf
         self.tw = tw
 
@@ -87,3 +88,30 @@ class IComponent:
         self.continuum_nodes = dict()
         # Couplings in the component
         self.couplings = list()
+        # Component length along n3-axis
+        self.length = 0.
+
+        # Container for imperfections
+        self.node_imperfections = dict()
+        # Defines the imperfection properties
+        self.imperfection_props = dict()
+
+    def _compute_length(self):
+        """ Computes the length of the component from the beam and continuum node coordinates. """
+        max_z = 0.
+        for node_id, coords in self.beam_nodes.items():
+            if coords[2] > max_z:
+                max_z = coords[2]
+        for node_id, coords in self.continuum_nodes.items():
+            if coords[2] > max_z:
+                max_z = coords[2]
+        self.length = max_z
+
+    def _check_imperfection_props(self):
+        """ Checks if all the scales are defined in the imperfection props. """
+        if 'local_scale' not in self.imperfection_props:
+            self.imperfection_props['local_scale'] = 1.
+        if 'straight_scale' not in self.imperfection_props:
+            self.imperfection_props['straight_scale'] = 1.
+        if 'twist_scale' not in self.imperfection_props:
+            self.imperfection_props['twist_scale'] = 1.

@@ -25,7 +25,7 @@ from __future__ import division, print_function
 import math
 
 
-def z_dir_imp_factor(z, num_waves, total_wave_length):
+def z_dir_imp_factor(z, num_waves, total_wave_length, **kwargs):
     """ Returns the imperfection factor based on the z-direction.
     :param float z: Coordinate in length direction.
     :param int num_waves: Number of half-wave lengths, either 1 or 2.
@@ -43,7 +43,8 @@ def z_dir_imp_factor(z, num_waves, total_wave_length):
     return h
 
 
-def flange_imperfection(x, y, z, reverse_wave, flange_width, total_wave_length, delta_flange, num_waves, epsilon, n2):
+def flange_imperfection(x, y, z, reverse_wave, flange_width, total_wave_length, delta_flange, num_waves, epsilon, n2,
+                        **kwargs):
     """ Returns the local imperfection specification for a node on the flanges.
 
     :param float x: x coordinate of node
@@ -96,7 +97,8 @@ def flange_imperfection(x, y, z, reverse_wave, flange_width, total_wave_length, 
     return list(w * n2)
 
 
-def web_imperfection(y, z, reverse_wave, web_depth, total_wave_length, delta_web, num_waves, epsilon, n1):
+def web_imperfection(y, z, reverse_wave, web_depth, total_wave_length, delta_web, num_waves, epsilon, n1,
+                     **kwargs):
     """ Returns the local imperfection specification for a node on the web.
 
     :param float y: y coordinate of node, -web_depth / 2 <= y <= web_depth / 2
@@ -135,7 +137,7 @@ def web_imperfection(y, z, reverse_wave, web_depth, total_wave_length, delta_web
     return list(w * n1)
 
 
-def straightness_imperfection(z, length, delta_global, oos_axis):
+def straightness_imperfection(z, length, delta_global, oos_axis, **kwargs):
     """ Returns the out-of-straightness imperfection of the node.
 
     :param float z: z coordinate of node
@@ -151,7 +153,7 @@ def straightness_imperfection(z, length, delta_global, oos_axis):
     return list(w * oos_axis)
 
 
-def plumbness_imperfection(z, length, delta_plumbness, oop_axis):
+def plumbness_imperfection(z, length, delta_plumbness, oop_axis, **kwargs):
     """  Returns the out-of-plumbness imperfection of the node.
 
     :param float z: z coordinate of node
@@ -164,7 +166,7 @@ def plumbness_imperfection(z, length, delta_plumbness, oop_axis):
     return list(w * oop_axis)
 
 
-def twisting_imperfection(x, y, z, length, theta_twist, n1, n2):
+def twisting_imperfection(x, y, z, length, theta_twist, n1, n2, **kwargs):
     """ Returns the twisting imperfection of the node.
 
     :param float x: x coordinate of node

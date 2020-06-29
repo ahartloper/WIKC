@@ -36,7 +36,7 @@ def set_imperfection_properties(component):
     STRAIGHT_FACTOR = 1500.
     TWIST_FACTOR = 0.6 / 100.
 
-    def local_amplitudes(geom, dw_max, df_max):
+    def local_amplitudes(section, dw_max, df_max):
         """ Calculate the flange and web imperfection amplitudes.
 
         :param float dw_max: max allowable web amplitude.
@@ -45,12 +45,12 @@ def set_imperfection_properties(component):
         """
         # First try dw = dw_max
         dw = dw_max
-        df = dw * geom.bf / 2. / ((geom.d - geom.tf) / 2.)
+        df = dw * section.bf / 2. / ((section.d - section.tf) / 2.)
 
         # Then try df = df_max if not satisfied
         if df > df_max:
             df = df_max
-            dw = df * ((geom.d - geom.tf) / 2.) / (geom.bf / 2.)
+            dw = df * ((section.d - section.tf) / 2.) / (section.bf / 2.)
             print('Flange controlled imperfection amplitude. Web amp = {0:0.3f}, flange amp = {1:0.3f}'.format(dw, df))
         else:
             print('Web controlled imperfection amplitude. Web amp = {0:0.3f}, flange amp = {1:0.3f}'.format(dw, df))
@@ -61,27 +61,25 @@ def set_imperfection_properties(component):
     props = dict()
     props['n1'] = component.coord_sys.basis[:, 0]
     props['n2'] = component.coord_sys.basis[:, 1]
-    # todo: need to compute the component length
-    props['length'] = None
-    # todo: num waves wavelength needs to be input
-    props['num_waves'] = None
-    props['total_wave_length'] = None
+    props['length'] = component.length
+    props['num_waves'] = component.imperfection_props['num_of_waves']
+    props['total_wave_length'] = component.imperfection_props['wave_length_factor'] * component.section.d
     props['flange_width'] = component.section.bf
     props['web_depth'] = component.section.d - 2. * component.section.tf
     # todo: other than constant, also for flange and web?
     props['epsilon'] = 0.2
 
     # Compute maximum amplitudes
-    max_flange_amp = component.section.bf / FLANGE_FACTOR
-    max_web_amp = component.section.d / WEB_FACTOR
-    local_amps = local_amplitudes(geom, max_web_amp, max_flange_amp)
+    max_flange_amp = component.section.bf / FLANGE_FACTOR * component.imperfection_props['local_scale']
+    max_web_amp = component.section.d / WEB_FACTOR * component.imperfection_props['local_scale']
+    local_amps = local_amplitudes(component.section, max_web_amp, max_flange_amp)
     props['delta_web'] = local_amps[0]
     props['delta_flange'] = local_amps[1]
-    oos_amp = props['length'] / STRAIGHT_FACTOR
+    oos_amp = props['length'] / STRAIGHT_FACTOR * component.imperfection_props['straight_scale']
     props['delta_global'] = oos_amp
     oop_amp = props['length'] * 0.
     props['delta_plumbness'] = oop_amp
-    props['theta_twist'] = TWIST_FACTOR
+    props['theta_twist'] = TWIST_FACTOR * component.imperfection_props['twist_scale']
     props['oos_axis'] = component.coord_sys.basis[:, 0]
     props['oop_axis'] = component.coord_sys.basis[:, 0]
 

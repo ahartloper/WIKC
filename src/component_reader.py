@@ -55,6 +55,7 @@ class AbaqusInpToComponentReader:
         self._define_component_domains()
         self._assign_component_coord_sys()
         self._assign_component_couplings()
+        self._compute_all_lengths()
         return self.components
 
     def _define_component_domains(self):
@@ -110,6 +111,12 @@ class AbaqusInpToComponentReader:
                     options[opt] = opt_val
             return options
 
+        def handle_empty(file, peeked_line):
+            """ Handle empty lines while reading file. """
+            while peeked_line == '':
+                line = file.readline()
+                peeked_line = peek_line(file).strip()
+
         with open(def_file, 'r') as file:
             line = file.readline()
             while line:
@@ -136,10 +143,7 @@ class AbaqusInpToComponentReader:
                         for li in l_list:
                             self.beam_sets[li] = []
                         peeked_line = peek_line(file).strip()
-                        # Handle empty lines
-                        while peeked_line == '':
-                            line = file.readline()
-                            peeked_line = peek_line(file).strip()
+                        handle_empty(file, peeked_line)
 
                 elif l_list[0] == '*ContinuumNodes':
                     peeked_line = 'START'
@@ -150,10 +154,7 @@ class AbaqusInpToComponentReader:
                         for li in l_list:
                             self.continuum_sets[li] = []
                         peeked_line = peek_line(file).strip()
-                        # Handle empty lines
-                        while peeked_line == '':
-                            line = file.readline()
-                            peeked_line = peek_line(file).strip()
+                        handle_empty(file, peeked_line)
 
                 elif l_list[0] == '*Coupling':
                     couple_options = opt_extract(l_list)
@@ -165,8 +166,27 @@ class AbaqusInpToComponentReader:
                     couple_data = {**couple_data, **couple_options}
                     self.components[-1].couplings_info.append(couple_data)
 
+                elif l_list[0] == '*Imperfection':
+                    imp_opts = dict()
+                    if len(l_list) > 1:
+                        for li in l_list[1:]:
+                            li2 = li.split('=')
+                            if li2[0].strip() == 'num_of_waves':
+                                imp_opts[li2[0].strip()] = int(li2[1])
+                            else:
+                                imp_opts[li2[0].strip()] = float(li2[1])
+                    self.components[-1].imperfection_props = imp_opts
+                    self.components[-1]._check_imperfection_props()
+                    handle_empty(file, peeked_line)
+
                 line = file.readline()
         return
+
+    def _compute_all_lengths(self):
+        """ Calculates all the lengths. """
+        for c in self.components:
+            c._compute_length()
+        pass
 
     def _read_inp_file(self, inp_file):
         """ Reads the coupling information in the input file. """

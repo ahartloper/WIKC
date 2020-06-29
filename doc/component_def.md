@@ -23,6 +23,7 @@ The prototype for the .def file is:
 <Continuum_nset_...>
 *Coupling, jtype=<jtype>
 <beam_nset_id>, <continuum_nset_id>
+*Imperfection, wave_length_factor=1., num_of_waves=1, twist_scale=1., local_scale=1., straight_scale=1.
 
 *EndDef
 '''
