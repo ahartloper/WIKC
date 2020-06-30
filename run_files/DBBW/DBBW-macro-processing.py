@@ -1,0 +1,72 @@
+
+import sys
+import os
+sys.path.append(os.path.join(sys.path[0], '..', '..'))
+from src.imperfections.generate_imperfections import set_imperfection_properties, generate_component_imp
+from src.imperfections.abaqus_txt_writer import AbaqusTxtWriter
+from src.abaqus_i_coupling_writer import AbaqusICouplingWriter
+from src.component_reader import AbaqusInpToComponentReader
+# Import matplotlib 3D
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+
+# Locate the files to read
+inp_file = 'run_files/DBBW/DBBW-Macro-KC-NoParts.inp'
+cdef_file = 'run_files/DBBW/DBBW-Macro-KC-NoParts-CDef.txt'
+out_dir = 'run_files/DBBW/output/'
+imp_file = os.path.join(out_dir, 'DBBW-Macro-KC-NoParts-Imp.txt')
+
+# Read the .inp file
+reader = AbaqusInpToComponentReader()
+reader.read(inp_file, cdef_file)
+imp_writer = AbaqusTxtWriter(reader.components)
+
+# Generate the imperfections
+for c in reader.components:
+    set_imperfection_properties(c)
+    generate_component_imp(c)
+imp_writer.write_imperfections(imp_file)
+
+# Write the coupling defintions
+couplings = []
+for c in reader.components:
+    couplings += c.couplings
+couple_writer = AbaqusICouplingWriter(out_dir)
+couple_writer.write(couplings)
+
+
+# # Plot each of the components
+# # Column
+# # col_nodes = reader.components[0].continuum_nodes
+# col_nodes = reader.components[0].get_imperfect_nodes()
+# fig = plt.figure()
+# ax = fig.add_subplot(111, projection='3d')
+# for nid, coords in col_nodes.items():
+#     ax.plot([coords[0]], [coords[1]], [coords[2]], 'ko')
+# ax.set_xlabel('x')
+# ax.set_ylabel('y')
+# ax.set_zlabel('z')
+# plt.show()
+
+# # Beam-1
+# # col_nodes = reader.components[1].continuum_nodes
+# col_nodes = reader.components[1].get_imperfect_nodes()
+# fig = plt.figure()
+# ax = fig.add_subplot(111, projection='3d')
+# for nid, coords in col_nodes.items():
+#     ax.plot([coords[0]], [coords[1]], [coords[2]], 'ko')
+# ax.set_xlabel('x')
+# ax.set_ylabel('y')
+# ax.set_zlabel('z')
+# plt.show()
+
+# # Beam-2
+# col_nodes = reader.components[2].continuum_nodes
+# fig = plt.figure()
+# ax = fig.add_subplot(111, projection='3d')
+# for nid, coords in col_nodes.items():
+#     ax.plot([coords[0]], [coords[1]], [coords[2]], 'ko')
+# ax.set_xlabel('x')
+# ax.set_ylabel('y')
+# ax.set_zlabel('z')
+# plt.show()

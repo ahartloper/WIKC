@@ -316,6 +316,24 @@ class AbaqusInpToComponentReader:
                 if np.linalg.det(np.column_stack((n1, n2, n3))) < 0:
                     n3 = -n3
                 n_123 = np.column_stack((n1, n2, n3))
+            elif len(cs_data) == 6:
+                # The data defines o, p1
+                o = cs_data[[0, 1, 2]]
+                n1 = cs_data[[3, 4, 5]] - o
+                n1 = n1 / np.linalg.norm(n1)
+                n3 = np.array([0., 0., 1.])
+                n2 = np.cross(n1, n3)
+                # Ensure right-handed system
+                if np.linalg.det(np.column_stack((n1, n2, n3))) < 0:
+                    n2 = -n2
+                n_123 = np.column_stack((n1, n2, n3))
+            elif len(cs_data) == 3:
+                # The data defines o
+                o = cs_data[[0, 1, 2]]
+                n_123 = np.identity(3)
+            # Keep only 8 digits of precision (neglect values < 10^-8)
+            o = o.round(8)
+            n_123 = n_123.round(8)
             self.cs_transforms[cs_tag] = {'origin': o, 'basis': n_123}
         pass
 
@@ -370,9 +388,13 @@ class AbaqusInpToComponentReader:
             cys_id = c.node_set_to_coordsys[c.continuum_node_sets[0]]
             base_normal_axis = self.cs_transforms[cys_id]['basis'][:, 2]
             coord_sys_offsets = dict()
+            # todo: handle beam node only components by using n1 from beam coord sys
             # Offset is computed as (cys_o - base_o) projected onto normal axis
             for node_set, cys_id in c.node_set_to_coordsys.items():
                 cys_coords = self.cs_transforms[cys_id]['origin']
-                coord_sys_offsets[cys_id] = np.dot(cys_coords - base_coords, base_normal_axis)
+                oset = np.dot(cys_coords - base_coords, base_normal_axis)
+                coord_sys_offsets[cys_id] = oset
+                if oset > 0.:
+                    UserWarning('Negative offset, check continuum and node sets in component definitions')                
             c.coord_sys_offsets = coord_sys_offsets
         pass

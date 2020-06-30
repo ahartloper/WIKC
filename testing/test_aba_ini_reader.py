@@ -8,6 +8,9 @@ def_file = 'testing/def_file_1.txt'
 def_file_jtype = 'testing/def_file_1_jtype.txt'
 cdef_file = 'testing/cdef_file_1.txt'
 
+macro_inp_file = 'testing/subassem-macro.inp'
+macro_cdef_file = 'testing/subassem-macro_cdef.txt'
+
 
 class TestAbaqusReader(unittest.TestCase):
 
@@ -94,4 +97,12 @@ class TestAbaqusComponentReader(unittest.TestCase):
         c = reader.read(inp_file, cdef_file)
         c = reader.components[0]
         self.assertEqual(c.length, 2000.)
+        pass
+
+    def test_macro_component_length(self):
+        reader = AbaqusInpToComponentReader()
+        reader.read(macro_inp_file, macro_cdef_file)
+        self.assertEqual(reader.components[0].length, 3708.)
+        self.assertEqual(reader.components[1].length, 3962.)
+        self.assertEqual(reader.components[2].length, 3962.)
         pass
