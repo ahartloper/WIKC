@@ -48,7 +48,7 @@ def set_imperfection_properties(component):
         df = dw * section.bf / 2. / ((section.d - section.tf) / 2.)
 
         # Then try df = df_max if not satisfied
-        if df > df_max:
+        if abs(df) > abs(df_max):
             df = df_max
             dw = df * ((section.d - section.tf) / 2.) / (section.bf / 2.)
             print('Flange controlled imperfection amplitude. Web amp = {0:0.3f}, flange amp = {1:0.3f}'.format(dw, df))
@@ -68,6 +68,12 @@ def set_imperfection_properties(component):
     props['web_depth'] = component.section.d - 2. * component.section.tf
     # todo: other than constant, also for flange and web?
     props['epsilon'] = 0.2
+    # RBS connection properties
+    if 'is_RBS' in component.imperfection_props:
+        props['is_RBS'] = component.imperfection_props['is_RBS']
+        props['RBS_offset'] = component.imperfection_props['RBS_offset']
+    else:
+        props['is_RBS'] = False
 
     # Compute maximum amplitudes
     max_flange_amp = component.section.bf / FLANGE_FACTOR * component.imperfection_props['local_scale']
@@ -90,6 +96,7 @@ def set_imperfection_properties(component):
 def generate_component_imp(component):
     """ Generates the imperfections for a component. """
     props = component.imperfection_props
+    mid_height = component.length / 2.
     # Process the beam nodes
     for node_id, coords in component.beam_nodes.items():
         imp = np.array([0., 0., 0.])
@@ -98,6 +105,10 @@ def generate_component_imp(component):
         component.node_imperfections[node_id] = imp
     # Process the continuum nodes
     for node_id, coords in component.continuum_nodes.items():
+        if coords[2] > mid_height and props['is_RBS'] is False:
+            is_top = True
+        else:
+            is_top = False
         imp = np.array([0., 0., 0.])
         imp += i_straight_imp(coords, props)
         imp += i_plumb_imp(coords, props)
@@ -119,11 +130,19 @@ def i_local_imp(coord, props, is_top_seg):
     # Check if top segment or bottom segment
     if is_top_seg:
         # Top segment z_mod starts at the top of the column and is positive in -z direction
-        z_mod = props.length - z
+        z_mod = props['length'] - z
         should_reverse = True
     else:
         z_mod = z
         should_reverse = False
+    # Account for the RBS offset, if RBS, will always be "bottom segment"
+    if props['is_RBS']:
+        # todo: this is a hack, and should be made into an option in web/flange imperfections
+        if props['RBS_offset'] <= z <= props['RBS_offset'] + props['total_wave_length']:
+            z_mod -= props['RBS_offset']
+        else:
+            # Large value so that will not be considered for local imperfections
+            z_mod = 1.0e8
     # Separate flange and web
     # todo: is seperating on x==0 the best condition? - is it necessary?
     x_tol = 1.e-8

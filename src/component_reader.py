@@ -173,6 +173,8 @@ class AbaqusInpToComponentReader:
                             li2 = li.split('=')
                             if li2[0].strip() == 'num_of_waves':
                                 imp_opts[li2[0].strip()] = int(li2[1])
+                            elif li2[0].strip() == 'is_RBS':
+                                imp_opts[li2[0].strip()] = bool(li2[1])
                             else:
                                 imp_opts[li2[0].strip()] = float(li2[1])
                     self.components[-1].imperfection_props = imp_opts

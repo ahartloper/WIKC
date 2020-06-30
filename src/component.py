@@ -115,3 +115,12 @@ class IComponent:
             self.imperfection_props['straight_scale'] = 1.
         if 'twist_scale' not in self.imperfection_props:
             self.imperfection_props['twist_scale'] = 1.
+
+    def get_imperfect_nodes(self):
+        """ Returns the node coordinates with the imperfection. """
+        self.imperfect_nodes = dict()
+        for node_id, coord in self.continuum_nodes.items():
+            self.imperfect_nodes[node_id] = np.array(coord) + np.array(self.node_imperfections[node_id])
+        for node_id, coord in self.beam_nodes.items():
+            self.imperfect_nodes[node_id] = np.array(coord) + np.array(self.node_imperfections[node_id])
+        return self.imperfect_nodes

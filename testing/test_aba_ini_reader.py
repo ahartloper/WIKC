@@ -87,3 +87,11 @@ class TestAbaqusComponentReader(unittest.TestCase):
         self.assertEqual(couple.include_warping, True)
         n3 = np.array([0., 0., 1.])
         np.testing.assert_array_equal(couple.normal_direction, n3)
+        pass
+
+    def test_component_length(self):
+        reader = AbaqusInpToComponentReader()
+        c = reader.read(inp_file, cdef_file)
+        c = reader.components[0]
+        self.assertEqual(c.length, 2000.)
+        pass
