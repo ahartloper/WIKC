@@ -11,15 +11,16 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
 # Locate the files to read
-inp_file = 'run_files/DBBW/DBBW-Macro-WIKC-NoParts.inp'
-cdef_file = 'run_files/DBBW/DBBW-Macro-KC-NoParts-CDef.txt'
-out_dir = 'run_files/DBBW/output/'
-imp_file = os.path.join(out_dir, 'DBBW-Macro-KC-NoParts-Imp.txt')
+inp_file = 'run_files/subassem_w27x235/SubAssem-W27X235-FS-Imp.inp'
+cdef_file = 'run_files/subassem_w27x235/SubAssem-W27X235-FS-Imp-CDef.txt'
+out_dir = 'run_files/subassem_w27x235/output/'
+imp_file = os.path.join(out_dir, 'DBBW-SubAssem-W27X235-FS-Imp-Imp.txt')
 
 # Read the .inp file
 reader = AbaqusInpToComponentReader()
 reader.read(inp_file, cdef_file)
 imp_writer = AbaqusTxtWriter(reader.components)
+
 
 # Generate the imperfections
 for c in reader.components:
@@ -27,12 +28,6 @@ for c in reader.components:
     generate_component_imp(c)
 imp_writer.write_imperfections(imp_file)
 
-# Write the coupling defintions
-couplings = []
-for c in reader.components:
-    couplings += c.couplings
-couple_writer = AbaqusICouplingWriter(out_dir)
-couple_writer.write(couplings)
 
 
 # # Plot each of the components

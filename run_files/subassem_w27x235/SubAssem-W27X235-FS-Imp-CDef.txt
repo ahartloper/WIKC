@@ -1,0 +1,24 @@
+
+*ISection, name=w27x235
+729., 361., 40.9, 23.1
+
+*ISection, name=w36x150
+912., 305., 23.9, 15.9
+
+
+*Component, name=column-1, section=w27x235
+*ContinuumNodes
+column-1_all_nodes
+*Imperfection, wave_length_factor=1.2, num_of_waves=1, is_RBS=True, RBS_offset=0.0, local_scale=-1., straight_scale=0., twist_scale=0.
+
+*Component, name=beam-1, section=w36x150
+*ContinuumNodes
+beam-1_all_nodes
+*Imperfection, wave_length_factor=0.752, num_of_waves=1, is_RBS=True, RBS_offset=228.6, local_scale=1.0, straight_scale=0., twist_scale=0.
+
+*Component, name=beam-2, section=w36x150
+*ContinuumNodes
+beam-2_all_nodes
+*Imperfection, wave_length_factor=0.752, num_of_waves=1, is_RBS=True, RBS_offset=228.6, local_scale=-1.0, straight_scale=0., twist_scale=0.
+
+*EndDef
