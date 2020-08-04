@@ -1,0 +1,23 @@
+
+*ISection, name=test
+110., 100., 10., 10.
+
+
+*Component, name=wikc, section=test
+*BeamNodes
+Part-1-1_Set-4
+*ContinuumNodes
+Part-2-1_Set-14
+*Coupling, jtype=27
+Part-1-1_beam_node, Part-2-1_interf_nodes_1
+
+*Component, name=lwikc, section=test
+*BeamNodes
+Part-1-1-lin-2-1-1_Set-4
+*ContinuumNodes
+Part-2-1-lin-2-1-1_Set-14
+*Coupling, jtype=17
+Part-1-1-lin-2-1-1_beam_node, Part-2-1-lin-2-1-1_interf_nodes_1
+
+
+*EndDef
