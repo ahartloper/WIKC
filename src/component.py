@@ -81,6 +81,7 @@ class IComponent:
         # Base coordinate system for the component
         self.coord_sys = None
         self.base_cys_id = None
+        self.orientation_id = None
         # Offsets in component 3-axis for each coord system
         self.coord_sys_offsets = dict()
         # All beam and continuum nodes in the component

@@ -89,7 +89,8 @@ class AbaqusInpToComponentReader:
         """ Assign the component coord sys to global coord sys transformation for all components. """
         for c in self.components:
             cs1 = c.base_cys_id
-            c.coord_sys = CoordSys(self.cs_transforms[cs1]['origin'], self.cs_transforms[cs1]['basis'])
+            cs2 = c.orientation_id
+            c.coord_sys = CoordSys(self.cs_transforms[cs1]['origin'], self.cs_transforms[cs2]['basis'])
 
     def _organize_beam_continuum_nodes(self):
         """ Organize all the nodes into either beam or continuum. """
@@ -386,13 +387,14 @@ class AbaqusInpToComponentReader:
             base_coords = self.cs_transforms[base_id]['origin']
             # Get base normal axis as n3 from any continuum node set
             cys_id = c.node_set_to_coordsys[c.continuum_node_sets[0]]
-            base_normal_axis = self.cs_transforms[cys_id]['basis'][:, 2]
+            component_normal_axis = self.cs_transforms[cys_id]['basis'][:, 2]
+            c.orientation_id = cys_id
             coord_sys_offsets = dict()
             # todo: handle beam node only components by using n1 from beam coord sys
             # Offset is computed as (cys_o - base_o) projected onto normal axis
             for node_set, cys_id in c.node_set_to_coordsys.items():
                 cys_coords = self.cs_transforms[cys_id]['origin']
-                oset = np.dot(cys_coords - base_coords, base_normal_axis)
+                oset = np.dot(cys_coords - base_coords, component_normal_axis)
                 coord_sys_offsets[cys_id] = oset
                 if oset > 0.:
                     UserWarning('Negative offset, check continuum and node sets in component definitions')                

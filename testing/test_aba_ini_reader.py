@@ -106,3 +106,58 @@ class TestAbaqusComponentReader(unittest.TestCase):
         self.assertEqual(reader.components[1].length, 3962.)
         self.assertEqual(reader.components[2].length, 3962.)
         pass
+
+    def test_macro_component_normals(self):
+        reader = AbaqusInpToComponentReader()
+        reader.read(macro_inp_file, macro_cdef_file)
+        c = reader.components
+        # column 1
+        couple = c[0].couplings[0]
+        n3 = np.array([0., 0., 1.])
+        np.testing.assert_array_equal(couple.normal_direction, n3)
+        # column 2
+        couple = c[0].couplings[1]
+        n3 = np.array([0., 0., 1.])
+        np.testing.assert_array_equal(couple.normal_direction, n3)
+        # beam1 2
+        couple = c[1].couplings[0]
+        n3 = np.array([0., -1., 0.])
+        np.testing.assert_array_equal(couple.normal_direction, n3)
+        # beam 2
+        couple = c[2].couplings[0]
+        n3 = np.array([0., 1., 0.])
+        np.testing.assert_array_equal(couple.normal_direction, n3)
+        pass
+
+    def test_coupling_orientation_z_align(self):
+        inp_file_1 = 'testing/WIKC-V2-Base.inp'
+        cdef_file_1 = 'testing/WIKC-V2-Base-CDef.txt'
+        reader = AbaqusInpToComponentReader()
+        reader.read(inp_file_1, cdef_file_1)
+        c = reader.components
+        # Component 1
+        couple = c[0].couplings[0]
+        n3 = np.array([0., 0., 1.])
+        np.testing.assert_array_equal(couple.normal_direction, n3)
+        # Component 2
+        couple = c[1].couplings[0]
+        n3 = np.array([0., 0., 1.])
+        np.testing.assert_array_equal(couple.normal_direction, n3)
+        pass
+
+    def test_coupling_orientation_y_align(self):
+        inp_file_1 = 'testing/WIKC-V2-y-orient.inp'
+        cdef_file_1 = 'testing/WIKC-V2-Base-CDef.txt'
+        reader = AbaqusInpToComponentReader()
+        reader.read(inp_file_1, cdef_file_1)
+        c = reader.components
+        # Component 1
+        couple = c[0].couplings[0]
+        n3 = np.array([0., 1., 0.])
+        np.testing.assert_array_equal(couple.normal_direction, n3)
+        # Component 2
+        couple = c[1].couplings[0]
+        n3 = np.array([0., 1., 0.])
+        np.testing.assert_array_equal(couple.normal_direction, n3)
+        pass
+    
