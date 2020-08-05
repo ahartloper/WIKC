@@ -1,8 +1,8 @@
 import unittest
 import numpy as np
-from src.reader import AbaqusInpReader
-from src.component_reader import AbaqusInpToComponentReader
-from src.imperfections.generate_imperfections import set_imperfection_properties, generate_component_imp
+from pywikc.reader import AbaqusInpReader
+from pywikc.component_reader import AbaqusInpToComponentReader
+from pywikc.imperfections.generate_imperfections import set_imperfection_properties, generate_component_imp
 
 inp_file = 'testing/subassem.inp'
 cdef_file = 'testing/subassem_cdef.txt'

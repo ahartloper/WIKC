@@ -1,5 +1,9 @@
-# Component Abaqus def file prototype
+# Component Abaqus definition file specification
 
+This file contains the specification for creating definition files.
+Definition files are used to create internal representations of components that are specified in Abaqus input files.
+The definition file contains information that is related to the coupling of different element domains and the imperfections applied to the component.
+The following rules should be adhered to for proper processing of the input file.
 
 ## Abaqus model definition rules
 
@@ -24,6 +28,7 @@ Component definition files are used in conjunction with Abaqus input files to cr
 - A continuum domain (may be empty)
 - `Imperfection`s
 - `Coupling`s between beam and continuum domains
+
 Note that the internal structure allows for translation between different software formats (e.g., LS-DYNA, ANSYS, NASTRAN) as long as the necessary readers and writers exist.
 At the moment, readers and writers only exist for Abaqus, thus this document is currently specific to that format.
 
@@ -35,10 +40,11 @@ Rules:
 - `*Section`s must be defined before `*Component`s.
 - All the lines that follow a `*Component` line up-to the next `*Component` or `*EndDef` line define its properties.
 - The file must end with `*EndDef` (and possibly empty lines afterwards).
-- If `is_RBS` is specified, the RBS is assumed to happen only on the end near the origin of the component.
+- If `is_RBS` is specified, the RBS and offset are assumed relative to the origin of the component.
+- All options must be on the same line as the keyword definition (e.g., when defining `*Imperfection` and its options)
 
-The prototype for the .def file is:
-'''
+The prototype for the definition file is:
+```
 *ISection, name=<section_id>
 <d>, <bf>, <tf>, <tw>
 
@@ -54,10 +60,13 @@ The prototype for the .def file is:
 *Imperfection, wave_length_factor=1., num_of_waves=1, twist_scale=1., local_scale=1., straight_scale=1., is_RBS=False, RBS_offset=0.
 
 *EndDef
-'''
+```
 
 
 ## Tips:
 Here are some tips to help:
-- It is easiest if all the nodes in a part are defined in a single node set, then they can be easily used to define the beam/continuum domains for a given component
+- It is easiest if all the beam element nodes are defined in a single set, and all the continuum element nodes are defined in a single set.
+- The default is to assume local imperfections at both ends of the component.
+This behavior can be over-ridden using the `is_RBS=True` option.
+The single local imperfection can then be placed at any point along the length of the member using the `RBS_offset` option.
 

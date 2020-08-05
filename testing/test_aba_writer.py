@@ -1,8 +1,8 @@
 import unittest
-from src.reader import AbaqusInpReader
-from src.component_reader import AbaqusInpToComponentReader
-from src.abaqus_equation_writer import AbaqusLinearCouplingWriter
-from src.abaqus_i_coupling_writer import AbaqusNonLinearCouplingWriter, AbaqusICouplingWriter
+from pywikc.reader import AbaqusInpReader
+from pywikc.component_reader import AbaqusInpToComponentReader
+from pywikc.abaqus_equation_writer import AbaqusLinearCouplingWriter
+from pywikc.abaqus_i_coupling_writer import AbaqusNonLinearCouplingWriter, AbaqusICouplingWriter
 
 inp_file = 'testing/Job-1.inp'
 def_file = 'testing/def_file_1.txt'

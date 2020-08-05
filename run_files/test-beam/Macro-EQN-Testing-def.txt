@@ -1,2 +1,0 @@
-*coupling
-Part-1-1_beam_node, Part-2-1_interf_nodes_1, (global)

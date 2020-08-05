@@ -1,4 +1,0 @@
-*coupling, jtype=27
-m_Set-21, top_segment_shell_top_nodes, (global)
-*coupling, jtype=27
-m_Set-22, shell_segment-1_shell_bot_nodes, (global)

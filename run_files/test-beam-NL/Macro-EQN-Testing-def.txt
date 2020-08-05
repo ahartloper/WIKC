@@ -1,5 +1,0 @@
-*coupling, jtype=27
-Part-1-1-lin-2-1-1_beam_node, Part-2-1-lin-2-1-1_interf_nodes_1, (global)
-
-*coupling, jtype=17
-Part-1-1_beam_node, Part-2-1_interf_nodes_1, (global)

@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
-from src.reader import AbaqusInpReader
-from src.component_reader import AbaqusInpToComponentReader
+from pywikc.reader import AbaqusInpReader
+from pywikc.component_reader import AbaqusInpToComponentReader
 
 inp_file = 'testing/Job-1.inp'
 def_file = 'testing/def_file_1.txt'
