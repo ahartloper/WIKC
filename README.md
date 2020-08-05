@@ -1,4 +1,4 @@
-# WIKC: Warping-Inclusive Kinematic Coupling (WIKC)
+# WIKC: Warping-Inclusive Kinematic Coupling
 
 Component macro models are a method of reducing the computational effort of full continuum component finite element models, while maintaining their solution fidelity.
 Macro models contain 1D beam-column (or beam) element domains and 2D/3D continuum elements.
@@ -143,13 +143,15 @@ Each definition file is related to an input file.
 Together, these two files are used to generate an internal representation of the model in `pywikc` that can be used to output the Abaqus keywords and imperfection files.
 See the `component_def.md` and `Example-CDef.md` files in the `docs/` directory for more information.
 
-The `pywikc` package provides the top-level function
+The `pywikc` package provides the following functions:
 ```
+gen_aba_couples(input_file, definition_file, output_dir)
+gen_aba_imperfections(input_file, definition_file, output_dir)
 gen_aba_couples_imperfections(input_file, definition_file, output_dir)
 ```
-that is the basic function for generating keywords and imperfections.
-The `input_file` is the Abaqus .inp file, the `definition_file` is the component definition file, and the imperfection and keywords output will be written to files in `output_dir`.
-See the `examples/` directory for how this function can be used.
+where `gen_aba_couples` creates only the keyword file for using the WIKC subroutine, `gen_aba_imperfections` creates only the imperfection file, and `gen_aba_couples_imperfections` creates both files.
+In all these functions, the `input_file` is the Abaqus .inp file, the `definition_file` is the component definition file, and the imperfection and keywords output will be written to files in `output_dir`.
+See the `examples/` directory for how these functions can be used.
 
 The `gen_aba_couples_imperfections` function generates two outputs: (1) an `MPC_Keywords.txt` file that contains all the keywords that need to be added to the input file, and (2) an `-Imp.txt` file that contains the nodal imperfections.
 The keywords need to be copied into the input file.
