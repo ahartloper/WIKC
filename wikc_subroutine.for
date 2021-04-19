@@ -83,7 +83,7 @@ C     Nonlinear constraint
 
       CONTAINS
 
-C     Rotation vector to rotation matrix using Rodriguez forumla
+C     Rotation vector to rotation matrix using Rodrigues forumla
       PURE FUNCTION RVEC2RMAT(rvec) RESULT(rrr)
       real(8), intent(in) :: rvec(3)
       real(8) :: rrr(3, 3)
