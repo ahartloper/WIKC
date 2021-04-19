@@ -52,7 +52,7 @@ C     Linear constraint
             UE(3) = disp_beam(3) - link(1)*rot_beam(2) 
      *              + link(2)*rot_beam(1)
             ! Constraint linearization
-            A(1:3, 4:6, 2) = -skew(link)
+            A(1:3, 4:6, 2) = skew(link)
             ! Warping component
             if (JTYPE == 17) then
                   UE(1:3) = UE(1:3) + warp_fun*w_beam*t_vec
@@ -61,17 +61,16 @@ C     Linear constraint
             end if
 C     Nonlinear constraint
       else if (JTYPE == 26 .or. JTYPE == 27) then
-            ! Transpose for right-hand multiplication
-            rmat = transpose(rvec2rmat(rot_beam))
+            rmat = rvec2rmat(rot_beam)
             t_vec = matmul(rmat, t_vec)
             rotlink = matmul(rmat, link)
             UE(1:3) = disp_beam + rotlink - link
-            A(1:3, 4:6, 2) = -skew(rotlink)
+            A(1:3, 4:6, 2) = skew(rotlink)
             ! Warping component
             if (JTYPE == 27) then
                   UE(1:3) = UE(1:3) + warp_fun*w_beam*t_vec
                   A(1:3, 4:6, 2) = A(1:3, 4:6, 2) 
-     *                   - skew(warp_fun*w_beam*t_vec)
+     *                   + skew(warp_fun*w_beam*t_vec)
                   A(1:3,   7, 2) = -warp_fun * t_vec
                   JDOF(7, 2) = 7
             end if
@@ -107,9 +106,10 @@ C     Vector to skew-symmetric matrix
       PURE FUNCTION SKEW(v) RESULT(m)
       real(8), intent(in) :: v(3)
       real(8) :: m(3, 3)
-      m(1:3, 1) = [0.d0, -v(3), v(2)]
-      m(1:3, 2) = [v(3), 0.d0, -v(1)]
-      m(1:3, 3) = [-v(2), v(1), 0.d0]
+      ! The following lines define the columns of the matrix
+      m(1:3, 1) = [0.d0, v(3), -v(2)]
+      m(1:3, 2) = [-v(3), 0.d0, v(1)]
+      m(1:3, 3) = [v(2), -v(1), 0.d0]
       END FUNCTION
 
       END SUBROUTINE
