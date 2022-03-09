@@ -178,4 +178,4 @@ This project is licensed under the MIT License - see the `LICENSE` file for deta
 - Dimitrios Lignos and Albano de Castro e Sousa for their invaluable input.
 
 ## References
-[1] Hartloper, de Castro e Sousa, and Lignos (2022). "Warping-Inclusive Kinematic Coupling in Mixed-Dimension Macro Models for Wide Flange Beam-Columns", Journal of Structural Engineering (submitted). DOI: 10.1061/(ASCE)ST.1943-541X.0003211.
+[1] Hartloper A.R., de Castro e Sousa A., and Lignos D.G. (2022). "Warping-Inclusive Kinematic Coupling in Mixed-Dimension Macro Models for Wide Flange Beam-Columns", Journal of Structural Engineering. DOI: 10.1061/(ASCE)ST.1943-541X.0003211.
