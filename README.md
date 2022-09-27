@@ -160,6 +160,19 @@ Another method is to copy the additions into the Keyword editor for the model in
 The keyword editor can be accessed by right-clicking on the model in Abaqus/CAE and selecting `Edit Keywords`.
 The imperfections can likewise be integrated into the model using the `*Imperfection` keyword as noted above.
 
+### A note on convergence
+
+Bi-moments are the energy conjugate to warping in beam-column elements.
+Therefore, including the warping degree of freedom (DOF) in the constraint formulation leads to residuals in DOF7 in Abaqus (DOF7 = warping degree of freedom).
+Abaqus, oddly, treats DOF7 as a "force" quantity when testing for convergence based on the relative residual values.
+The bi-moment, however, has a unit of force x length x length, therefore, a bi-moment residual that is completely inconsequential may have a "large" residual compared to force quantities because of this dimensional mismatch (i.e., force vs force x length x length).
+In turn, this may affect the overall convergence of the model, especially if the time-averaged applied force is low (e.g., in first increment or first few increments).
+
+One way of alleviating this convergence issue is to relax the tolerance on the relative force (displacement) residual using the "General Solution Controls".
+**IF THIS METHOD IS USED, IT SHOULD ONLY BE DONE FOR THE FIRST INCREMENT**.
+After the first increment, the tolerance should be set back to the desired level (e.g., the default of 0.5% or as dictated by the problem).
+This could be done, for instance, by creating an extra step with the relaxed tolerance and applying a small fraction of the loads before proceeding to the target loading with the desired tolerance.
+
 
 ## Contributing
 
@@ -167,7 +180,7 @@ Bug fixes and contributions can be raised by opening a new issue in the WIKC rep
 
 ## Authors
 
-Code written and maintained by Alex Hartloper (alexander.hartloper@epfl.ch).
+Code written and maintained by Alex Hartloper.
 
 ## License
 
